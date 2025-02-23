@@ -15,7 +15,7 @@ Keep this Terminal window open while running Selenium.
 
 
 Script opens up search ads 360, and prompts user to navigate to the templates section. 
-Then, user should add any filters that are required to show all templates on a single page.
+Then, user should manually add any filters that are required to show all templates on a single page.
 
 Press enter within python instance to get the script to start. It'll look for the first row, copy the title of the template to a predefined .txt file path, then click on the settings cog.
 
