@@ -3,35 +3,34 @@
 
 Requires Selenium installed (pip install selenium)
 
-To prevent issues with having to open new window each time wanting to run script, manually start Chrome in debugging mode & connect to existing session (preserves cookies etc):
+To prevent issues with having to open new window each time wanting to run script, manually start Chrome in debugging mode & connect to existing session. You'll have to login to this chrome instance, but as long as the window remains open you won't have to login again. Login data is preserved in /tmp/ChromeProfile.
 
 Run this in Terminal:
 
 	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="/tmp/ChromeProfile"
 
 
-This starts Chrome with remote debugging enabled and preserves login data in /tmp/ChromeProfile.
 Keep this Terminal window open while running Selenium.
 
 
-Script opens up search ads 360, and prompts user to navigate to the templates section. 
-Then, user should manually add any filters that are required to show all templates on a single page.
+When run, the script opens up Google Search Ads 360, and prompts the user to navigate to the templates section. 
+Then, the user should manually add any filters that are required to show all desired templates on a single page.
 
-Press enter within python instance to get the script to start. It'll look for the first row, copy the title of the template to a predefined .txt file path, then click on the settings cog.
+The script will wait for user input before starting any scraping. When the enter key is pressed within the python instance, the script will look for the first row in the table shown, copy the title of the template to a predefined .txt file path, then click on the settings cog.
 
-When the first page of the settings loads, the script will automatically go to the second page, and copy the final URL path to the same .txt file.
+When the first page of the settings loads, the script will automatically go to the second page, and copy the final URL path to the same .txt file, separated by the "|" symbol.
 
-Then, the script will click on the back button and go to the second row to follow the same process. Progress is saved in a sa360_progress.txt file.
+Then, the script will click on the back button and go to the second row to follow the same process. Progress (as to what row the script is on) is saved in a sa360_progress.txt file, only when the data is scraped for that row.
 
-For deeper rows within the table, the script will scroll a few rows at a time to get to the needed row. It may take a few seconds to scroll to rows 100+, but script can reliably scroll.
+For deeper rows within the table, the script will scroll a few rows at a time to get to the needed row. 
+It may take a few seconds to scroll to rows 100+, but the script can reliably scroll. Each scroll is 0.3 seconds apart, to allow for lazy loading content, particularly on slower connections. this value can be updated to be faster or slower deoending on requirements.
 
-
-If the script crashes (usually when the chrome tab crashes, error handling not added properly yet), you can just re-run from the start - progress is saved so the script will start where you left off. Data is just appended to the end of your file (including header row so there will be some duplicate rows)
+If the script crashes (usually when the chrome tab crashes, error handling is not added properly yet), you can just re-run the script - progress is saved so the script will start where you left off. You will have to apply filters again and get the desired templates to show up. Data is just appended to the end of your file rather than re-writing (including header row so there will be some duplicate rows)
 
 
 Need to add:
-- proper crash handling 
-- deleting progress file on successful completion
-- better scroll detection - sometimes when the table doesn't load fast enough it can skip rows
-- handling pagination
-- inputting filters
+- proper crash handling -3
+- deleting progress file on successful completion -1
+- better scroll detection - sometimes when the table doesn't load fast enough it can skip rows -2
+- handling pagination -4
+- inputting filters automatically -5
