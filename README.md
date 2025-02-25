@@ -34,3 +34,4 @@ Need to add:
 - better scroll detection - sometimes when the table doesn't load fast enough it can skip rows -2
 - handling pagination -4
 - inputting filters automatically -5
+- running headlessly
