@@ -35,3 +35,12 @@ Need to add:
 - handling pagination -4
 - inputting filters automatically -5
 - running headlessly
+- checking for already running chrome, if not, launching new instance
+- adding user input for number of rows to scrape
+- ask for what row to start from to override progress.txt if present
+
+bugs / issues
+- settings click not working on first instance
+- not working on non-kw templates - add detail on when & where is appropriate to use, add error checking to ensure is used in right places
+- need to get it to cancel / quit when getting to end of displayed results if internal number does not match row count (to prevent attempting endless scrape). 
+

@@ -42,7 +42,7 @@ def save_progress(template_index):
         f.write(str(template_index))
 
 # open .txt file for logging results. if file exists appends rows to bottom.
-results_file = "sa360_results.txt"
+results_file = "test_sa360_results.txt"
 with open(results_file, "a") as file:
     file.write("Template Name | Final URL\n")
     print("\n🚀 Starting SA360 Scraping...\n")
@@ -52,7 +52,7 @@ with open(results_file, "a") as file:
     print(f"🔄 Resuming from template {last_processed}...\n")
 
     # loop through first xxx templates on page 1 - table rows start from 2, so 100 rows will be 2,102
-    for i in range(last_processed, 99):
+    for i in range(last_processed, 20):
         try:
             print(f"\n🔄 Processing template {i - 1}...")
             time.sleep(1)
@@ -125,4 +125,9 @@ with open(results_file, "a") as file:
 
 # Close driver after completion
 print("\n✅ Scraping completed! Results saved to 'sa360_results.txt'.")
+# Delete the progress file after completion
+if os.path.exists(progress_file):
+    os.remove(progress_file)
+    print(f"\n🗑️ Progress file '{progress_file}' deleted. Ready for a fresh start next time.")
+
 driver.quit()
