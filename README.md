@@ -1,8 +1,6 @@
 # sa_360_scraping
  Testing selenium to scrape multiple templates in Search Ads 360
 
-Requires Selenium installed (pip install selenium)
-
 To prevent issues with having to open new window each time wanting to run script, manually start Chrome in debugging mode & connect to existing session. You'll have to login to this chrome instance, but as long as the window remains open you won't have to login again. Login data is preserved in /tmp/ChromeProfile.
 
 Run this in Terminal:
