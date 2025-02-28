@@ -45,7 +45,7 @@ def save_progress(template_index):
 results_file = "test_sa360_results.txt"
 with open(results_file, "a") as file:
     file.write("Template Name | Final URL\n")
-    print("\n🚀 Starting SA360 Scraping...\n")
+    print("\n Starting SA360 Scraping...\n")
 
     # resume from last processed template
     last_processed = get_last_processed_template()
