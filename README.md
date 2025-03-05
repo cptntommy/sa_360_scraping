@@ -33,7 +33,7 @@ Need to add:
 - handling pagination -4
 - inputting filters automatically -5
 - running headlessly
-- checking for already running chrome, if not, launching new instance
+- checking for already running chrome, if not, launching new instance & navigating to correct location
 - adding user input for number of rows to scrape
 - ask for what row to start from to override progress.txt if present
 
