@@ -33,8 +33,8 @@ def get_last_processed_template():
     if os.path.exists(progress_file):
         with open(progress_file, "r") as f:
             last_line = f.readlines()[-1].strip()
-            return int(last_line) if last_line.isdigit() else 2
-    return 2  # default to row 2 if no progress is recorded
+            return int(last_line) if last_line.isdigit() else 1
+    return 1  # default to row 2 if no progress is recorded
 
 def save_progress(template_index):
     """ Saves the current template index to the progress file. """
@@ -54,7 +54,7 @@ with open(results_file, "a") as file:
     # loop through first xxx templates on page 1 - table rows start from 2, so 100 rows will be 2,102
     for i in range(last_processed, 20):
         try:
-            print(f"\n🔄 Processing template {i - 1}...")
+            print(f"\n🔄 Processing template {i}...")
             time.sleep(1)
             template_xpath = template_xpath_pattern.format(i)
 
