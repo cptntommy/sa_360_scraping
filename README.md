@@ -26,19 +26,23 @@ It may take a few seconds to scroll to rows 100+, but the script can reliably sc
 If the script crashes (usually when the chrome tab crashes, error handling is not added properly yet), you can just re-run the script - progress is saved so the script will start where you left off. You will have to apply filters again and get the desired templates to show up. Data is just appended to the end of your file rather than re-writing (including header row so there will be some duplicate rows)
 
 
+Recently Added:
+- Deleting progress file on completion (and prompting user if they want it deleted)
+- Better scroll detection so scrolls more reliably, and retries if issue presents
+- Taking user input on number of rows to scrape
+- Taking user input on whether to use the progress file (if detected)
+- Taking user input on a manual override for progress file if desired
+- Some crash handling & retry logic
+- Settings button double click on first instance to handle bug of not working on first row click
+
 Need to add:
-- proper crash handling -3
-- deleting progress file on successful completion -1
-- better scroll detection - sometimes when the table doesn't load fast enough it can skip rows -2
-- handling pagination -4
-- inputting filters automatically -5
+- proper crash handling
+- handling pagination
+- inputting filters automatically
 - running headlessly
 - checking for already running chrome, if not, launching new instance & navigating to correct location
-- adding user input for number of rows to scrape
-- ask for what row to start from to override progress.txt if present
 
 bugs / issues
-- settings click not working on first instance
+- settings click not working on first instance (fixed)
 - not working on non-kw templates - add detail on when & where is appropriate to use, add error checking to ensure is used in right places
 - need to get it to cancel / quit when getting to end of displayed results if internal number does not match row count (to prevent attempting endless scrape). 
-
