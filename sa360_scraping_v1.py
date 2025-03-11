@@ -26,7 +26,7 @@ back_button_xpath = "/html/body/div[1]/root/div/div[1]/awsm-app-bar/div/div[2]/m
 status_xpath = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm-child-content/content-main/div/div[2]/entitybuilder-root/base-root/div/div[2]/div[1]/view-loader/keyword-template-construction-host/guided-flow-wrapper/div/main-flow-stepper/ess-stepper/material-stepper/div[2]/div/step-loader/template-settings-construction/guided-flow-step/div[1]/construction-layout/construction-layout-engine/div/div/div[2]/div[1]/lazy-plugin/div/dynamic-component/template-name-plugin/construction-panel/div/construction-plugin-panel/material-expansionpanel/div/div[2]/div/div[1]/div/div/div[1]/div"
 
 # store progress in a .txt file to resume from last template
-progress_file = "sa360_progress.txt"  # if starting from scratch on new page, change value in file to 2
+progress_file = "sa360_progress.txt"
 
 def get_last_processed_template():
     """ Reads the last processed template index from the progress file. """
@@ -34,25 +34,37 @@ def get_last_processed_template():
         with open(progress_file, "r") as f:
             last_line = f.readlines()[-1].strip()
             return int(last_line) if last_line.isdigit() else 1
-    return 1  # default to row 2 if no progress is recorded
+    return 2  # default to row 2 if no progress is recorded
 
 def save_progress(template_index):
     """ Saves the current template index to the progress file. """
     with open(progress_file, "w") as f:
         f.write(str(template_index))
 
+# Check for existing progress and ask user for start row
+start_row = 2
+if os.path.exists(progress_file):
+    last_processed = get_last_processed_template()
+    use_progress = input(f"Found a previous session at row {last_processed}. Do you want to continue from there? (y/n): ").lower()
+    if use_progress == 'y':
+        start_row = last_processed
+    else:
+        start_row = int(input("Enter the row number to start from: "))
+else:
+    start_row = int(input("Enter the row number to start from: "))
+
+# Ask user for number of rows to scrape
+end_row = int(input("Enter the number of rows to scrape: ")) + start_row
+
 # open .txt file for logging results. if file exists appends rows to bottom.
 results_file = "test_sa360_results.txt"
 with open(results_file, "a") as file:
     file.write("Template Name | Final URL\n")
     print("\n Starting SA360 Scraping...\n")
+    print(f"🔄 Starting from row {start_row} and scraping {end_row - start_row} rows...\n")
 
-    # resume from last processed template
-    last_processed = get_last_processed_template()
-    print(f"🔄 Resuming from template {last_processed}...\n")
-
-    # loop through first xxx templates on page 1 - table rows start from 2, so 100 rows will be 2,102
-    for i in range(last_processed, 20):
+    # loop through templates based on user input
+    for i in range(start_row, end_row):
         try:
             print(f"\n🔄 Processing template {i}...")
             time.sleep(1)
@@ -125,9 +137,12 @@ with open(results_file, "a") as file:
 
 # Close driver after completion
 print("\n✅ Scraping completed! Results saved to 'sa360_results.txt'.")
-# Delete the progress file after completion
-if os.path.exists(progress_file):
+# Ask user if they want to delete the progress file
+delete_progress = input("\n🗑️ Do you want to delete the progress file for a fresh start next time? (y/n): ").lower()
+if delete_progress == 'y' and os.path.exists(progress_file):
     os.remove(progress_file)
     print(f"\n🗑️ Progress file '{progress_file}' deleted. Ready for a fresh start next time.")
+else:
+    print(f"\n💾 Progress file '{progress_file}' preserved for next session.")
 
 driver.quit()
