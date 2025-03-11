@@ -34,6 +34,7 @@ Recently Added:
 - Taking user input on a manual override for progress file if desired
 - Some crash handling & retry logic
 - Settings button double click on first instance to handle bug of not working on first row click
+- keyword scraping functionality
 
 Need to add:
 - proper crash handling
@@ -41,6 +42,7 @@ Need to add:
 - inputting filters automatically
 - running headlessly
 - checking for already running chrome, if not, launching new instance & navigating to correct location
+- ability to allow user input for specifying final output file name
 
 bugs / issues
 - settings click not working on first instance (fixed)

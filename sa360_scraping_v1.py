@@ -25,6 +25,9 @@ final_url_xpath = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/a
 back_button_xpath = "/html/body/div[1]/root/div/div[1]/awsm-app-bar/div/div[2]/material-button"
 status_xpath = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm-child-content/content-main/div/div[2]/entitybuilder-root/base-root/div/div[2]/div[1]/view-loader/keyword-template-construction-host/guided-flow-wrapper/div/main-flow-stepper/ess-stepper/material-stepper/div[2]/div/step-loader/template-settings-construction/guided-flow-step/div[1]/construction-layout/construction-layout-engine/div/div/div[2]/div[1]/lazy-plugin/div/dynamic-component/template-name-plugin/construction-panel/div/construction-plugin-panel/material-expansionpanel/div/div[2]/div/div[1]/div/div/div[1]/div"
 
+# New XPath pattern for keywords
+keyword_xpath_pattern = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm-child-content/content-main/div/div/entitybuilder-root/base-root/div/div[2]/div[1]/view-loader/keyword-template-construction-host/guided-flow-wrapper/div/main-flow-stepper/ess-stepper/material-stepper/div[2]/div/step-loader/keyword-template-construction/template-attributes-construction/guided-flow-step/div[1]/construction-layout/construction-layout-engine/div/div/div[2]/div[1]/lazy-plugin/div/dynamic-component/keyword-template-text/overridable-plugin-panel/construction-panel/div/construction-plugin-panel/material-expansionpanel/div/div[2]/div/div[1]/div/div/div[2]/div/plugin-content/div/keyword-template-text-editor/div/div[{}]/div/template-custom-column-inline-input/div/formula-editor/div/div[2]"
+
 # store progress in a .txt file to resume from last template
 progress_file = "sa360_progress.txt"
 
@@ -63,7 +66,7 @@ end_row = int(input("Enter the number of rows to scrape: ")) + start_row
 # open .txt file for logging results. if file exists appends rows to bottom.
 results_file = "test_sa360_results.txt"
 with open(results_file, "a") as file:
-    file.write("Template Name | Final URL\n")
+    file.write("Template Name | Final URL | Keywords\n")
     print("\n Starting SA360 Scraping...\n")
     print(f"🔄 Starting from row {start_row} and scraping {end_row - start_row} rows...\n")
 
@@ -134,13 +137,38 @@ with open(results_file, "a") as file:
             driver.find_element(By.CLASS_NAME, continue_button_class).click()
             print("➡️ Clicked 'Continue'.")
 
+            # **Scrape all keywords**
+            keywords = []
+            keyword_index = 1
+            max_attempts = 30  # Maximum number of keywords to check
+
+            print("🔍 Scraping keywords...")
+            for keyword_index in range(1, max_attempts + 1):
+                try:
+                    keyword_xpath = keyword_xpath_pattern.format(keyword_index)
+                    # Short timeout for checking if keyword exists
+                    keyword_element = WebDriverWait(driver, 2).until(
+                        EC.presence_of_element_located((By.XPATH, keyword_xpath))
+                    )
+                    keyword_text = keyword_element.text
+                    keywords.append(keyword_text)
+                    print(f"✅ Keyword {keyword_index}: {keyword_text}")
+                except:
+                    # If we can't find any more keywords, break the loop
+                    print(f"🔍 No more keywords found after {keyword_index - 1} keywords.")
+                    break
+
+            # Join all keywords with a separator
+            keywords_text = " | ".join(keywords)
+            print(f"📝 Found {len(keywords)} keywords.")
+
             # **Ensure the Final URL field is visible before proceeding**
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, final_url_xpath)))
             final_url = driver.find_element(By.XPATH, final_url_xpath).text
             print(f"🔗 Final URL: {final_url}")
 
             # Save to file
-            file.write(f"{template_name} | {final_url}\n")
+            file.write(f"{template_name} | {final_url} | {keywords_text}\n")
 
             # Save progress
             save_progress(i)
