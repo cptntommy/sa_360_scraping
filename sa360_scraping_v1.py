@@ -28,6 +28,7 @@ status_xpath = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm
 # store progress in a .txt file to resume from last template
 progress_file = "sa360_progress.txt"
 
+
 def get_last_processed_template():
     """ Reads the last processed template index from the progress file. """
     if os.path.exists(progress_file):
@@ -36,20 +37,23 @@ def get_last_processed_template():
             return int(last_line) if last_line.isdigit() else 1
     return 2  # default to row 2 if no progress is recorded
 
+
 def save_progress(template_index):
     """ Saves the current template index to the progress file. """
     with open(progress_file, "w") as f:
         f.write(str(template_index))
 
+
 # Check for existing progress and ask user for start row
 start_row = 2
 if os.path.exists(progress_file):
     last_processed = get_last_processed_template()
-    use_progress = input(f"Found a previous session at row {last_processed}. Do you want to continue from there? (y/n): ").lower()
+    use_progress = input(
+        f"Found a previous session at row {last_processed}. Do you want to continue from there? (y/n): ").lower()
     if use_progress == 'y':
         start_row = last_processed
     else:
-        start_row = int(input("Enter the row number to start from: "))
+        start_row = int(input("Enter the row number to start from (table starts at row 2): "))
 else:
     start_row = int(input("Enter the row number to start from (table starts at row 2): "))
 
@@ -94,14 +98,36 @@ with open(results_file, "a") as file:
                 EC.element_to_be_clickable((By.CSS_SELECTOR, settings_cog_css)))
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", settings_cog)
             time.sleep(0.3)  # Short delay before clicking
-            settings_cog.click()
-            print("⚙️ Clicked settings cog.")
+
+            # Simple solution: Click twice for the first row
+            if i == start_row:
+                print("⚙️ First row - clicking settings cog twice...")
+                settings_cog.click()
+                time.sleep(0.5)  # Short delay between clicks
+
+                # Try to find and click it again
+                try:
+                    settings_cog = driver.find_element(By.CSS_SELECTOR, settings_cog_css)
+                    settings_cog.click()
+                    print("⚙️ Second click on settings cog.")
+                except:
+                    # If second click fails, that might mean first click worked
+                    print("⚙️ Second click not needed (first click likely worked).")
+            else:
+                settings_cog.click()
+                print("⚙️ Clicked settings cog.")
 
             # **Wait until the 'Status' field is visible before clicking 'Continue'**
-            WebDriverWait(driver, 30).until(
-                EC.presence_of_element_located((By.XPATH, status_xpath))
-            )
-            print("✅ field is visible. now clicking 'Continue'.")
+            try:
+                WebDriverWait(driver, 30).until(
+                    EC.presence_of_element_located((By.XPATH, status_xpath))
+                )
+                print("✅ Status field is visible. now clicking 'Continue'.")
+            except:
+                # If we can't find the status field, maybe we need manual intervention
+                if i == start_row:
+                    print("⚠️ Status field not found after clicking settings cog")
+                    input("❗ Please click the settings cog manually if needed, then press Enter to continue...")
 
             # **Click 'Continue'**
             WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CLASS_NAME, continue_button_class)))
@@ -124,16 +150,18 @@ with open(results_file, "a") as file:
             driver.find_element(By.XPATH, back_button_xpath).click()
             print("⬅️ clicked 'Back' button. returning to main list...")
 
-        except Exception as e:
-            print(f"❌ Error processing template {i - 1}: {e}")
+            # Add a slight delay after returning to the list, especially for the first iteration
+            if i == start_row:
+                time.sleep(0.5)
 
-            # **Handle page crashes - refresh & continue** NOT WORKING
-            if "chrome has stopped" in str(e).lower() or "tab crashed" in str(e).lower():
-                print("⚠️ Tab crashed! Refreshing page...")
-                driver.refresh()
-                time.sleep(10)  # Allow time for the page to reload
-                print("🔄 Page refreshed. Resuming...")
-                continue  # Skip to the next loop iteration
+        except Exception as e:
+            print(f"❌ Error processing template {i}: {e}")
+
+            # Ask user if they want to retry this row or continue to next
+            retry = input(f"❓ Error on row {i}. Retry this row? (y/n): ").lower()
+            if retry == 'y':
+                i -= 1  # Adjust index to retry the same row
+                continue
 
 # Close driver after completion
 print("\n✅ Scraping completed! Results saved to 'sa360_results.txt'.")
