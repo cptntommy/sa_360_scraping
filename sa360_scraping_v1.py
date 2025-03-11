@@ -51,7 +51,7 @@ if os.path.exists(progress_file):
     else:
         start_row = int(input("Enter the row number to start from: "))
 else:
-    start_row = int(input("Enter the row number to start from: "))
+    start_row = int(input("Enter the row number to start from (table starts at row 2): "))
 
 # Ask user for number of rows to scrape
 end_row = int(input("Enter the number of rows to scrape: ")) + start_row
