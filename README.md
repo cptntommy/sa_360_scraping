@@ -43,8 +43,11 @@ Need to add:
 - running headlessly
 - checking for already running chrome, if not, launching new instance & navigating to correct location
 - ability to allow user input for specifying final output file name
+- add functionality to ask user how many kws per template to scrape
 
 bugs / issues
 - settings click not working on first instance (fixed)
 - not working on non-kw templates - add detail on when & where is appropriate to use, add error checking to ensure is used in right places
 - need to get it to cancel / quit when getting to end of displayed results if internal number does not match row count (to prevent attempting endless scrape). 
+- Alternatively, if row number is not found, offer alternative to fully quit rather than retry row
+

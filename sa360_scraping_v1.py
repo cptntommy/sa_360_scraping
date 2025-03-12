@@ -180,7 +180,7 @@ with open(results_file, "a") as file:
 
             # Add a slight delay after returning to the list, especially for the first iteration
             if i == start_row:
-                time.sleep(0.5)
+                time.sleep(1)
 
         except Exception as e:
             print(f"❌ Error processing template {i}: {e}")
