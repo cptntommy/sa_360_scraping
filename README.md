@@ -45,6 +45,7 @@ Need to add:
 - ability to allow user input for specifying final output file name
 - add functionality to ask user how many kws per template to scrape
 - ability to scrape 'KW status dropdown' - that returns 'broad'/'exact'/'phrase'
+- text shown to user around where file is exported needs to match actual file name
 
 bugs / issues
 - settings click not working on first instance (fixed)
