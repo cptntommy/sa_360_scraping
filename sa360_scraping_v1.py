@@ -12,7 +12,7 @@ options.debugger_address = "127.0.0.1:9222"  # Connect to an existing Chrome ses
 driver = webdriver.Chrome(options=options)
 
 # Navigate to SA360. if using existing session with previous scrape, just different filters, then can comment out
-driver.get("https://searchads.google.com/")
+# driver.get("https://searchads.google.com/")
 
 # wait for user to log in & apply filters
 input("log in, apply filters to show desired templates, then press Enter to continue...")
@@ -27,6 +27,9 @@ status_xpath = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm
 
 # New XPath pattern for keywords
 keyword_xpath_pattern = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm-child-content/content-main/div/div/entitybuilder-root/base-root/div/div[2]/div[1]/view-loader/keyword-template-construction-host/guided-flow-wrapper/div/main-flow-stepper/ess-stepper/material-stepper/div[2]/div/step-loader/keyword-template-construction/template-attributes-construction/guided-flow-step/div[1]/construction-layout/construction-layout-engine/div/div/div[2]/div[1]/lazy-plugin/div/dynamic-component/keyword-template-text/overridable-plugin-panel/construction-panel/div/construction-plugin-panel/material-expansionpanel/div/div[2]/div/div[1]/div/div/div[2]/div/plugin-content/div/keyword-template-text-editor/div/div[{}]/div/template-custom-column-inline-input/div/formula-editor/div/div[2]"
+
+# New XPath pattern for keyword dropdown values
+keyword_dropdown_xpath_pattern = "/html/body/div[1]/root/div/div[1]/div[2]/div/div[3]/div/div/awsm-child-content/content-main/div/div[2]/entitybuilder-root/base-root/div/div[2]/div[1]/view-loader/keyword-template-construction-host/guided-flow-wrapper/div/main-flow-stepper/ess-stepper/material-stepper/div[2]/div/step-loader/keyword-template-construction/template-attributes-construction/guided-flow-step/div[1]/construction-layout/construction-layout-engine/div/div/div[2]/div[1]/lazy-plugin/div/dynamic-component/keyword-template-text/overridable-plugin-panel/construction-panel/div/construction-plugin-panel/material-expansionpanel/div/div[2]/div/div[1]/div/div/div[2]/div/plugin-content/div/keyword-template-text-editor/div/div[{}]/div/div/match-type-select/material-dropdown-select/dropdown-button/div/span"
 
 # store progress in a .txt file to resume from last template
 progress_file = "sa360_progress.txt"
@@ -63,17 +66,26 @@ else:
 # Ask user for number of rows to scrape
 end_row = int(input("Enter the number of rows to scrape: ")) + start_row
 
+# Ask user for custom output txt file path
+results_file = str(input("Enter the name of your export file. Don't forget the .txt extension!: "))
+
 # open .txt file for logging results. if file exists appends rows to bottom.
-results_file = "test_sa360_results.txt"
+# results_file = "full_sa360_results.txt"
 with open(results_file, "a") as file:
-    file.write("Template Name | Final URL | Keywords\n")
+    # Updated header with paired columns for keywords and match types
+    file.write("Template Name | Final URL")
+    # Create headers for up to 30 keyword pairs (adjust as needed)
+    for j in range(1, 31):
+        file.write(f" | Keyword {j} | Match Type {j}")
+    file.write("\n")
+
     print("\n Starting SA360 Scraping...\n")
     print(f"🔄 Starting from row {start_row} and scraping {end_row - start_row} rows...\n")
 
     # loop through templates based on user input
     for i in range(start_row, end_row):
         try:
-            print(f"\n🔄 Processing template {i}...")
+            print(f"\n🔄 Processing template {i - 1}...")
             time.sleep(1)
             template_xpath = template_xpath_pattern.format(i)
 
@@ -137,12 +149,12 @@ with open(results_file, "a") as file:
             driver.find_element(By.CLASS_NAME, continue_button_class).click()
             print("➡️ Clicked 'Continue'.")
 
-            # **Scrape all keywords**
+            # **Scrape all keywords and their dropdown values**
             keywords = []
-            keyword_index = 1
+            keyword_match_types = []
             max_attempts = 30  # Maximum number of keywords to check
 
-            print("🔍 Scraping keywords...")
+            print("🔍 Scraping keywords and match types...")
             for keyword_index in range(1, max_attempts + 1):
                 try:
                     keyword_xpath = keyword_xpath_pattern.format(keyword_index)
@@ -152,23 +164,42 @@ with open(results_file, "a") as file:
                     )
                     keyword_text = keyword_element.text
                     keywords.append(keyword_text)
-                    print(f"✅ Keyword {keyword_index}: {keyword_text}")
+
+                    # Get the match type dropdown value for this keyword
+                    try:
+                        dropdown_xpath = keyword_dropdown_xpath_pattern.format(keyword_index)
+                        dropdown_value = WebDriverWait(driver, 2).until(
+                            EC.presence_of_element_located((By.XPATH, dropdown_xpath))
+                        ).text
+                        keyword_match_types.append(dropdown_value)
+                        print(f"✅ Keyword {keyword_index}: {keyword_text} (Match Type: {dropdown_value})")
+                    except:
+                        keyword_match_types.append("Unknown")
+                        print(f"✅ Keyword {keyword_index}: {keyword_text} (Match Type: Unknown)")
                 except:
                     # If we can't find any more keywords, break the loop
                     print(f"🔍 No more keywords found after {keyword_index - 1} keywords.")
                     break
 
-            # Join all keywords with a separator
-            keywords_text = " | ".join(keywords)
-            print(f"📝 Found {len(keywords)} keywords.")
+            print(f"📝 Found {len(keywords)} keywords with match types.")
 
             # **Ensure the Final URL field is visible before proceeding**
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, final_url_xpath)))
             final_url = driver.find_element(By.XPATH, final_url_xpath).text
             print(f"🔗 Final URL: {final_url}")
 
-            # Save to file
-            file.write(f"{template_name} | {final_url} | {keywords_text}\n")
+            # Save to file with paired keyword and match type columns
+            row_data = f"{template_name} | {final_url}"
+
+            # Add each keyword and its match type as adjacent columns
+            for j in range(len(keywords)):
+                row_data += f" | {keywords[j]} | {keyword_match_types[j]}"
+
+            # Fill empty cells for any remaining columns
+            for j in range(len(keywords), 30):
+                row_data += f" |  | "
+
+            file.write(row_data + "\n")
 
             # Save progress
             save_progress(i)
@@ -192,7 +223,7 @@ with open(results_file, "a") as file:
                 continue
 
 # Close driver after completion
-print("\n✅ Scraping completed! Results saved to 'sa360_results.txt'.")
+print(f"\n✅ Scraping completed! Results saved to '{results_file}'")
 # Ask user if they want to delete the progress file
 delete_progress = input("\n🗑️ Do you want to delete the progress file for a fresh start next time? (y/n): ").lower()
 if delete_progress == 'y' and os.path.exists(progress_file):
