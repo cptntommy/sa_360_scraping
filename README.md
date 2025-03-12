@@ -38,7 +38,7 @@ Recently Added:
 - Taking user input on a manual override for progress file if desired
 - Some crash handling & retry logic
 - Settings button double click on first instance to handle bug of not working on first row click
-- **keyword scraping functionality**
+- keyword scraping functionality
 
 Need to add:
 - proper crash handling
